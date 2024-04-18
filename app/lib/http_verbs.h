@@ -1,0 +1,6 @@
+#ifndef HTTP_VERBS
+
+#define HTTP_STATUSLINE_OK "HTTP/1.1 200 OK\r\n\r\n"
+#define HTTP_STATUSLINE_NOT_FOUND "HTTP/1.1 400 NOT FOUND\r\n\r\n"
+
+#endif // !HTTP_VERBS
