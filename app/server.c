@@ -8,6 +8,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#define BUFFER_SIZE 1024
+
 int main() {
   // Disable output buffering
   setbuf(stdout, NULL);
@@ -54,7 +56,7 @@ int main() {
       accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
   printf("Client connected\n");
 
-  char buffer[1024];
+  char buffer[BUFFER_SIZE];
   int bytes_read = recv(client_fd, buffer, sizeof(buffer), 0);
 
   printf("Received: %s\n", buffer);
