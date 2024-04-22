@@ -87,6 +87,7 @@ int main() {
     int endIndex = strlen(request.m_path) - strlen(ECHO_ROUTE);
     printf("Getting Value from '%s' from index %d to end index %d\n",
            request.m_path, startIndex, endIndex);
+    // TODO: Make this work.
     strncpy(returnvalue, request.m_path + (strlen(ECHO_ROUTE)),
             strlen(request.m_path) - strlen(ECHO_ROUTE) + 1);
     char *toSend = getPlainReturnValue(HTTP_STATUSLINE_OK, returnvalue);
