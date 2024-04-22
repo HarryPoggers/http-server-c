@@ -1,11 +1,12 @@
 #include "lib/parsehttpcontent.h"
 #include "lib/stringutil.h"
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 
 void parseRequestLine(HttpRequest *content, char *headerLine);
-void parseHeaders(HttpRequest *content, char *line);
+bool parseHeaders(HttpRequest *content, char *line, int headerIndex);
 
 HttpRequest *parseHttpContent(char *buf, size_t bufsize) {
   // Allocate memory for the HttpContent struct that will be returned by the end
@@ -22,15 +23,29 @@ HttpRequest *parseHttpContent(char *buf, size_t bufsize) {
   // Split elements by newlines
   char *newline = "\r\n";
   int lines_count = 0;
+  int headerIndex = 0;
   char **lines = split(buf, newline, &lines_count);
+
+  char *body;
 
   for (int i = 0; i < lines_count; i++) {
     if (i == 0) {
       parseRequestLine(c, lines[i]);
       continue;
+    } else if (strcmp(lines[i], newline) != 0) {
+      if (parseHeaders(c, lines[i], headerIndex)) {
+        headerIndex++;
+      } else { // If it's not a header by standard, append it to the body
+        strcat(c->m_body, lines[i]);
+      }
     }
-    parseHeaders(c, lines[i]);
   }
+
+  // Make sure the Memory is freed
+  for (int i = 0; i < lines_count; i++) {
+    free(lines[i]);
+  }
+  free(lines);
 
   return c;
 }
@@ -53,18 +68,37 @@ void parseRequestLine(HttpRequest *content, char *line) {
       break;
     }
   }
+
+  // Make sure the Memory is freed
+  for (int i = 0; i < element_count; i++) {
+    free(elements[i]);
+  }
+
+  free(elements);
 }
 
-void parseHeaders(HttpRequest *content, char *line) {
+bool parseHeaders(HttpRequest *content, char *line, int headerIndex) {
   char *colon = ":";
   int count = 0;
+  bool done = false;
   char **elements = split(line, colon, &count);
 
-  if (count != 2) {
-    return;
+  if (count < 2) {
+    return false;
   } else {
-    for (int i = 0; i < count; i++) {
-      content->m_headers[i] = line;
-    }
+    content->m_headers[headerIndex] =
+        malloc(strlen(line)); // Allocate memory to save the content in
+    strcpy(content->m_headers[headerIndex],
+           line); // Copy the value to the specified index
+    done = true;
   }
+
+  // Make sure the Memory is freed
+  for (int i = 0; i < count; i++) {
+    free(elements[i]);
+  }
+
+  free(elements);
+
+  return done;
 }

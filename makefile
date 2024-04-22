@@ -1,4 +1,4 @@
-build: server parser stringutil
+build: server parser stringutil response
 	@echo "Linking..."
 	@gcc build/*.o -o build/http-server
 
@@ -15,6 +15,10 @@ stringutil:
 	@echo "Compiling stringutil..."
 	@gcc -c -o build/stringutil.o app/stringutil.c
 
-debug: server parser stringutil
+response:
+	@echo "Compiling response..."
+	@gcc -c -o build/response.o app/httpresponse.c
+
+debug: server parser stringutil response
 	@echo "Compiling with debug symbols..."
 	@gcc build/*.o -g -o build/http-server

@@ -1,5 +1,8 @@
+#include "lib/arrayutil.h"
+#include "lib/http_response.h"
 #include "lib/http_response_line.h"
 #include "lib/parsehttpcontent.h"
+#include "lib/routes.h"
 #include <errno.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
@@ -60,15 +63,34 @@ int main() {
   char buffer[BUFFER_SIZE];
   int bytes_read = recv(client_fd, buffer, sizeof(buffer), 0);
 
-  printf("Received %d bytes: %s\n", bytes_read, buffer);
+  printf("Received %d bytes\n", bytes_read);
 
   HttpRequest request = *parseHttpContent(buffer, bytes_read);
 
-  printf("Received Method: %s\t Received Path: %s\t Received Version: %s\n",
+  printf("Received Method: %s\t Received Path: %s\t Received Version: %s\n\n",
          request.m_method, request.m_path, request.m_version);
+
+  for (int i = 0; i < ARRAYLENGTH(request.m_headers); i++) {
+    if (request.m_headers[i] != NULL) {
+      printf("Header %d:\t%s\n", i, request.m_headers[i]);
+    }
+  }
+  printf("\n");
+
+  printf("Body:\t%s\n", request.m_body);
 
   if (strcmp(request.m_path, "/") == 0) {
     send(client_fd, HTTP_STATUSLINE_OK, strlen(HTTP_STATUSLINE_OK), 0);
+  } else if (strncmp(request.m_path, ECHO_ROUTE, strlen(ECHO_ROUTE)) == 0) {
+    char *returnvalue;
+    int startIndex = strlen(ECHO_ROUTE) - 1;
+    int endIndex = strlen(request.m_path) - strlen(ECHO_ROUTE);
+    printf("Getting Value from '%s' from index %d to end index %d\n",
+           request.m_path, startIndex, endIndex);
+    strncpy(returnvalue, request.m_path + (strlen(ECHO_ROUTE)),
+            strlen(request.m_path) - strlen(ECHO_ROUTE) + 1);
+    char *toSend = getPlainReturnValue(HTTP_STATUSLINE_OK, returnvalue);
+    send(client_fd, toSend, strlen(toSend), 0);
   } else {
     send(client_fd, HTTP_STATUSLINE_NOT_FOUND,
          strlen(HTTP_STATUSLINE_NOT_FOUND), 0);
