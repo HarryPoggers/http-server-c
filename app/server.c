@@ -59,7 +59,7 @@ int main() {
   char buffer[BUFFER_SIZE];
   int bytes_read = recv(client_fd, buffer, sizeof(buffer), 0);
 
-  printf("Received: %s\n", buffer);
+  printf("Received %d bytes: %s\n", bytes_read, buffer);
 
   send(client_fd, HTTP_STATUSLINE_OK, strlen(HTTP_STATUSLINE_OK), 0);
 

@@ -1,6 +1,12 @@
+build: server parser
+	@echo "Linking..."
+	@gcc build/server.o build/httpparser.o -o build/http-server
+
 server:
 	@set -e
-	@gcc -lcurl app/server.c -o build/server.o
+	@echo "Compiling main Server..."
+	@gcc -c -o build/server.o app/server.c
 
-run: server
-	@gcc build/server.o -o build/http-server
+parser:
+	@echo "Compiling parser..."
+	@gcc -c -o build/httpparser.o app/httpparser.c
