@@ -1,4 +1,4 @@
-#include "lib/http_verbs.h"
+#include "lib/http_response_line.h"
 #include "lib/parsehttpcontent.h"
 #include <errno.h>
 #include <netinet/in.h>
@@ -62,12 +62,12 @@ int main() {
 
   printf("Received %d bytes: %s\n", bytes_read, buffer);
 
-  HttpContent content = *parseHttpContent(buffer, bytes_read);
+  HttpRequest request = *parseHttpContent(buffer, bytes_read);
 
   printf("Received Method: %s\t Received Path: %s\t Received Version: %s\n",
-         content.m_method, content.m_path, content.m_version);
+         request.m_method, request.m_path, request.m_version);
 
-  if (strcmp(content.m_path, "/") == 0) {
+  if (strcmp(request.m_path, "/") == 0) {
     send(client_fd, HTTP_STATUSLINE_OK, strlen(HTTP_STATUSLINE_OK), 0);
   } else {
     send(client_fd, HTTP_STATUSLINE_NOT_FOUND,

@@ -4,13 +4,13 @@
 #include <string.h>
 #include <strings.h>
 
-void parseRequestLine(HttpContent *content, char *headerLine);
-void parseHeaders(HttpContent *content, char *line);
+void parseRequestLine(HttpRequest *content, char *headerLine);
+void parseHeaders(HttpRequest *content, char *line);
 
-HttpContent *parseHttpContent(char *buf, size_t bufsize) {
+HttpRequest *parseHttpContent(char *buf, size_t bufsize) {
   // Allocate memory for the HttpContent struct that will be returned by the end
   // of this function
-  struct HttpContent *c = malloc(sizeof(struct HttpContent));
+  struct HttpRequest *c = malloc(sizeof(struct HttpRequest));
   // Parse the values of the HTTP Request
   // Definition of HTTP Request
   // <METHOD> <PATH> <HTTPVERSION>
@@ -35,7 +35,7 @@ HttpContent *parseHttpContent(char *buf, size_t bufsize) {
   return c;
 }
 
-void parseRequestLine(HttpContent *content, char *line) {
+void parseRequestLine(HttpRequest *content, char *line) {
   char *space = " ";
   int element_count = 0;
   char **elements = split(line, space, &element_count);
@@ -55,7 +55,7 @@ void parseRequestLine(HttpContent *content, char *line) {
   }
 }
 
-void parseHeaders(HttpContent *content, char *line) {
+void parseHeaders(HttpRequest *content, char *line) {
   char *colon = ":";
   int count = 0;
   char **elements = split(line, colon, &count);

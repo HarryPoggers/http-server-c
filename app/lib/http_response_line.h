@@ -1,7 +1,7 @@
-#ifndef HTTP_VERBS_H
-#define HTTP_VERBS_H
+#ifndef HTTP_STATUSLINE_H
+#define HTTP_STATUSLINE_H
 
 #define HTTP_STATUSLINE_OK "HTTP/1.1 200 OK\r\n\r\n"
 #define HTTP_STATUSLINE_NOT_FOUND "HTTP/1.1 404 NOT FOUND\r\n\r\n"
 
-#endif // !HTTP_VERBS_H
+#endif
