@@ -3,11 +3,21 @@
 
 #include <stddef.h>
 
+#define MAX_BODY_SIZE 1024
+
 typedef struct HttpContent {
-  char *m_path;
-  char *m_method;
-  char **m_headers;
+  char m_method[10];
+  char m_path[255];
+  char m_version[20];
+  char *m_headers[255];
+  char m_body[MAX_BODY_SIZE];
 } HttpContent;
+
+typedef enum HttpStructure {
+  REQ_METHOD = 0,
+  REQ_PATH = 1,
+  REQ_VERSION = 2
+} HttpStructure;
 
 /*
  * parseHttpContent will return a HttpContent object to easily access the
