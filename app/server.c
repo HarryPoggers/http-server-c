@@ -82,16 +82,10 @@ int main() {
   if (strcmp(request.m_path, "/") == 0) {
     send(client_fd, HTTP_STATUSLINE_OK, strlen(HTTP_STATUSLINE_OK), 0);
   } else if (strncmp(request.m_path, ECHO_ROUTE, strlen(ECHO_ROUTE)) == 0) {
-    char *returnvalue;
-    int startIndex = strlen(ECHO_ROUTE) - 1;
-    int endIndex = strlen(request.m_path) - strlen(ECHO_ROUTE);
-    printf("Getting Value from '%s' from index %d to end index %d\n",
-           request.m_path, startIndex, endIndex);
-    // TODO: Make this work.
-    strncpy(returnvalue, request.m_path + (strlen(ECHO_ROUTE)),
-            strlen(request.m_path) - strlen(ECHO_ROUTE) + 1);
+    char *returnvalue = strstr(request.m_path, ECHO_ROUTE);
+    returnvalue += strlen(ECHO_ROUTE);
     char *toSend = getPlainReturnValue(HTTP_STATUSLINE_OK, returnvalue);
-    send(client_fd, toSend, strlen(toSend), 0);
+    send(client_fd, toSend, strlen(toSend), 0); // fails here somehow
   } else {
     send(client_fd, HTTP_STATUSLINE_NOT_FOUND,
          strlen(HTTP_STATUSLINE_NOT_FOUND), 0);

@@ -5,7 +5,8 @@
 char *getPlainReturnValue(char *statusline, char *content) {
   char *returnValue;
   sprintf(returnValue,
-          "%s\r\nContent-Type: text/plain\r\nContent-Length: %lu\r\n%s",
+          "%sContent-Type: text/plain\r\nContent-Length: %lu\r\n\r\n%s\r\n",
           statusline, strlen(content), content);
+
   return returnValue;
 }
