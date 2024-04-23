@@ -3,6 +3,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+char *getResponseCodeValue(char *statusline) {
+  char *returnValue = (char *)malloc(strlen(statusline) + 1);
+  if (returnValue == NULL) {
+    return NULL;
+  }
+
+  sprintf(returnValue, "%s\r\n", statusline);
+
+  return returnValue;
+}
+
 char *getPlainReturnValue(char *statusline, char *content) {
   // Calculate the length of the HTTP headers and separators
   size_t headersLength =

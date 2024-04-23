@@ -79,16 +79,20 @@ int main() {
 
   printf("Body:\t%s\n", request.m_body);
 
+  char *toSend;
+
   if (strcmp(request.m_path, "/") == 0) {
-    send(client_fd, HTTP_STATUSLINE_OK, strlen(HTTP_STATUSLINE_OK), 0);
+    toSend = getResponseCodeValue(HTTP_STATUSLINE_OK);
   } else if (strncmp(request.m_path, ECHO_ROUTE, strlen(ECHO_ROUTE)) == 0) {
     char *returnvalue = strstr(request.m_path, ECHO_ROUTE);
     returnvalue += strlen(ECHO_ROUTE);
-    char *toSend = getPlainReturnValue(HTTP_STATUSLINE_OK, returnvalue);
-    send(client_fd, toSend, strlen(toSend), 0);
+    toSend = getPlainReturnValue(HTTP_STATUSLINE_OK, returnvalue);
   } else {
-    send(client_fd, HTTP_STATUSLINE_NOT_FOUND,
-         strlen(HTTP_STATUSLINE_NOT_FOUND), 0);
+    toSend = getResponseCodeValue(HTTP_STATUSLINE_NOT_FOUND);
+  }
+
+  if (toSend != NULL) {
+    send(client_fd, toSend, strlen(toSend), 0);
   }
 
   close(server_fd);
