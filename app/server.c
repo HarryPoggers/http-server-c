@@ -85,7 +85,7 @@ int main() {
     char *returnvalue = strstr(request.m_path, ECHO_ROUTE);
     returnvalue += strlen(ECHO_ROUTE);
     char *toSend = getPlainReturnValue(HTTP_STATUSLINE_OK, returnvalue);
-    send(client_fd, toSend, strlen(toSend), 0); // fails here somehow
+    send(client_fd, toSend, strlen(toSend), 0);
   } else {
     send(client_fd, HTTP_STATUSLINE_NOT_FOUND,
          strlen(HTTP_STATUSLINE_NOT_FOUND), 0);
