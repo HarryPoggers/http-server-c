@@ -7,6 +7,8 @@
 #include <errno.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
+#include <pthread.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,6 +16,8 @@
 #include <unistd.h>
 
 #define BUFFER_SIZE 1024
+
+void *handleRequest(void *client_fd);
 
 int main() {
   // Disable output buffering
@@ -54,17 +58,40 @@ int main() {
     return EXIT_FAILURE;
   }
 
-  printf("Waiting for a client to connect...\n");
-  client_addr_len = sizeof(client_addr);
+  while (true) {
 
-  int client_fd =
-      accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
-  printf("Client connected\n");
+    printf("Waiting for a client to connect...\n");
+    client_addr_len = sizeof(client_addr);
+
+    int client_fd =
+        accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
+    printf("Client connected\n");
+
+    pthread_t t;
+    printf("Creating thread for request\n");
+    if (pthread_create(&t, NULL, handleRequest, (void *)&client_fd) != 0) {
+      printf("Failed to create thread to handle request data\n");
+      continue; // Skip to the next iteration
+    }
+  }
+
+  close(server_fd);
+
+  return 0;
+}
+
+void *handleRequest(void *data) {
+  char *toSend;
+  int *client_fd = (int *)data;
 
   char buffer[BUFFER_SIZE];
-  int bytes_read = recv(client_fd, buffer, sizeof(buffer), 0);
+  int bytes_read = recv(*client_fd, buffer, sizeof(buffer), 0);
 
   printf("Received %d bytes\n", bytes_read);
+
+  if (!(bytes_read > 0)) {
+    return NULL;
+  }
 
   HttpRequest request = *parseHttpContent(buffer, bytes_read);
 
@@ -79,8 +106,6 @@ int main() {
   printf("\n");
 
   printf("Body:\t%s\n", request.m_body);
-
-  char *toSend;
 
   if (strcmp(request.m_path, "/") == 0) {
     toSend = getResponseCodeValue(HTTP_STATUSLINE_OK);
@@ -108,12 +133,12 @@ int main() {
 
   if (toSend != NULL) {
     printf("***********Sending Back************\n%s\n***********Sending "
-           "Back************",
+           "Back************\n",
            toSend);
-    send(client_fd, toSend, strlen(toSend), 0);
+    send(*client_fd, toSend, strlen(toSend), 0);
   }
 
-  close(server_fd);
+  close(*client_fd);
 
-  return 0;
+  return NULL;
 }

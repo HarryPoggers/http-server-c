@@ -1,11 +1,10 @@
 build: server parser stringutil response
 	@echo "Linking..."
-	@gcc build/*.o -o build/http-server -s
-
+	@gcc build/*.o -o build/http-server -s -pthread
 server:
 	@set -e
 	@echo "Compiling main Server..."
-	@gcc -c -o build/server.o app/server.c -g
+	@gcc -c -o build/server.o app/server.c -g -pthread
 
 parser:
 	@echo "Compiling parser..."
@@ -21,4 +20,4 @@ response:
 
 debug: server parser stringutil response
 	@echo "Compiling with debug symbols..."
-	@gcc build/*.o -o build/http-server -g
+	@gcc build/*.o -o build/http-server -g -pthread
