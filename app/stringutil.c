@@ -1,4 +1,5 @@
 #include "lib/stringutil.h"
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -67,3 +68,19 @@ char **split(char *string, char *seperators, int *count) {
 
   return strings;
 }
+
+char *ltrim(char *s) {
+  while (isspace(*s))
+    s++;
+  return s;
+}
+
+char *rtrim(char *s) {
+  char *back = s + strlen(s);
+  while (isspace(*--back))
+    ;
+  *(back + 1) = '\0';
+  return s;
+}
+
+char *trim(char *s) { return rtrim(ltrim(s)); }

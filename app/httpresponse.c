@@ -1,4 +1,5 @@
 #include "lib/http_response.h"
+#include "lib/stringutil.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,8 +22,7 @@ char *getPlainReturnValue(char *statusline, char *content) {
   // Calculate the total length needed for the return value
   size_t totalLength = strlen(statusline) + strlen(content) + headersLength;
   // Allocate memory for the return value
-  char *returnValue =
-      (char *)malloc(totalLength + 1); // +1 for the null terminator
+  char *returnValue = (char *)malloc(totalLength); // +1 for the null terminator
   if (returnValue == NULL) {
     // Handle memory allocation failure
     return NULL;

@@ -3,6 +3,7 @@
 #include "lib/http_response_line.h"
 #include "lib/parsehttpcontent.h"
 #include "lib/routes.h"
+#include "lib/stringutil.h"
 #include <errno.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
@@ -87,11 +88,28 @@ int main() {
     char *returnvalue = strstr(request.m_path, ECHO_ROUTE);
     returnvalue += strlen(ECHO_ROUTE);
     toSend = getPlainReturnValue(HTTP_STATUSLINE_OK, returnvalue);
+  } else if (strcmp(request.m_path, USER_AGENT_ROUTE) == 0) {
+    char toSearch[] = "User-Agent:";
+    for (int i = 0; i < ARRAYLENGTH(request.m_headers); i++) {
+      if (request.m_headers[i] != NULL) {
+        if (strncmp(request.m_headers[i], toSearch, strlen(toSearch)) == 0) {
+          int count = 0;
+          char *seperators = ": ";
+          char **parts = split(request.m_headers[i], seperators, &count);
+          if (count == 2) {
+            toSend = getPlainReturnValue(HTTP_STATUSLINE_OK, parts[1]);
+          }
+        }
+      }
+    }
   } else {
     toSend = getResponseCodeValue(HTTP_STATUSLINE_NOT_FOUND);
   }
 
   if (toSend != NULL) {
+    printf("***********Sending Back************\n%s\n***********Sending "
+           "Back************",
+           toSend);
     send(client_fd, toSend, strlen(toSend), 0);
   }
 
