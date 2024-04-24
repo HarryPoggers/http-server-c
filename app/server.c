@@ -15,7 +15,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 4096
 
 void *handleRequest(void *client_fd);
 
@@ -24,7 +24,6 @@ int main() {
   setbuf(stdout, NULL);
 
   int server_fd, client_addr_len;
-  struct sockaddr_in client_addr;
 
   server_fd = socket(AF_INET, SOCK_STREAM, 0);
   if (server_fd == -1) {
@@ -60,19 +59,28 @@ int main() {
 
   while (true) {
 
+    struct sockaddr_in client_addr;
+
     printf("Waiting for a client to connect...\n");
     client_addr_len = sizeof(client_addr);
-
-    int client_fd =
-        accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
+    int client_fd = accept(server_fd, (struct sockaddr *)&client_addr,
+                           (socklen_t *)&client_addr_len);
+    if (client_fd < 0) {
+      printf("Accept failed: %s\n", strerror(errno));
+      return 1;
+    }
     printf("Client connected\n");
 
     pthread_t t;
     printf("Creating thread for request\n");
     if (pthread_create(&t, NULL, handleRequest, (void *)&client_fd) != 0) {
       printf("Failed to create thread to handle request data\n");
+      close(client_fd);
       continue; // Skip to the next iteration
     }
+
+    pthread_detach(
+        t); // Detach from the thread to allow it to clean up after itself
   }
 
   close(server_fd);
@@ -82,14 +90,15 @@ int main() {
 
 void *handleRequest(void *data) {
   char *toSend;
-  int *client_fd = (int *)data;
+  int client_fd = *(int *)data;
 
   char buffer[BUFFER_SIZE];
-  int bytes_read = recv(*client_fd, buffer, sizeof(buffer), 0);
+  int bytes_read = recv(client_fd, buffer, sizeof(buffer), 0);
 
-  printf("Received %d bytes\n", bytes_read);
+  printf("Received %d bytes from %d\n", bytes_read, client_fd);
 
-  if (!(bytes_read > 0)) {
+  if (bytes_read < 0) {
+    close(client_fd);
     return NULL;
   }
 
@@ -132,13 +141,13 @@ void *handleRequest(void *data) {
   }
 
   if (toSend != NULL) {
-    printf("***********Sending Back************\n%s\n***********Sending "
+    printf("***********Sending Back to %d************\n%s\n***********Sending "
            "Back************\n",
-           toSend);
-    send(*client_fd, toSend, strlen(toSend), 0);
+           client_fd, toSend);
+    send(client_fd, toSend, strlen(toSend), 0);
   }
 
-  close(*client_fd);
+  close(client_fd);
 
   return NULL;
 }

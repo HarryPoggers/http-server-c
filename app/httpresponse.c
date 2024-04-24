@@ -5,12 +5,15 @@
 #include <string.h>
 
 char *getResponseCodeValue(char *statusline) {
-  char *returnValue = (char *)malloc(strlen(statusline) + 1);
+  char *contentLengthHeader = "Content-Length: 0\r\n";
+
+  char *returnValue =
+      (char *)malloc(strlen(statusline) + strlen(contentLengthHeader) + 1);
   if (returnValue == NULL) {
     return NULL;
   }
 
-  sprintf(returnValue, "%s\r\n", statusline);
+  sprintf(returnValue, "%s%s\r\n", statusline, contentLengthHeader);
 
   return returnValue;
 }
