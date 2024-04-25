@@ -40,13 +40,20 @@ char *getPlainReturnValue(char *statusline, char *content) {
   return returnValue;
 }
 
-char *getOctetStreamResponse(char *statusline, char *filePath) {
+char *getOctetStreamResponse(char *statusline, char directory[],
+                             char *fileName) {
+  char *filePath = malloc(strlen(directory) + strlen(fileName) +
+                          2); // plus 2 for the / and the terminator
+  sprintf(filePath, "%s/%s", directory, fileName);
+
+  printf("Getting file content at %s", filePath);
+
   char *headers = "Content-Type: application/octet-stream\r\nContent-Length: ";
   size_t headersLength = strlen(headers + 1);
 
   char *fileContent = getFileContents(filePath);
   size_t contentLength;
-  if (strcmp(fileContent, FILE_UNABLE_TO_BE_OPENED)) {
+  if (strcmp(fileContent, FILE_UNABLE_TO_BE_OPENED) == 0) {
     statusline = HTTP_STATUSLINE_NOT_FOUND;
     contentLength = 0;
   } else {

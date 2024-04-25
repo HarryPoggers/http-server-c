@@ -1,5 +1,4 @@
 #include "lib/arrayutil.h"
-#include "lib/filehandler.h"
 #include "lib/http_response.h"
 #include "lib/http_response_line.h"
 #include "lib/parsehttpcontent.h"
@@ -18,11 +17,15 @@
 
 #define BUFFER_SIZE 4096
 
+char directory[128];
+
 void *handleRequest(void *client_fd);
 
-int main() {
+int main(int argc, char *argv[]) {
   // Disable output buffering
   setbuf(stdout, NULL);
+
+  strcpy(directory, argv[2]);
 
   int server_fd, client_addr_len;
 
@@ -145,7 +148,8 @@ void *handleRequest(void *data) {
     }
   } else if (strncmp(request.m_path, FILES_ROUTE, strlen(FILES_ROUTE)) == 0) {
     char *path = strstr(request.m_path, FILES_ROUTE);
-    toSend = getOctetStreamResponse(HTTP_STATUSLINE_OK, path);
+    path += strlen(FILES_ROUTE);
+    toSend = getOctetStreamResponse(HTTP_STATUSLINE_OK, directory, path);
   } else {
     toSend = getResponseCodeValue(HTTP_STATUSLINE_NOT_FOUND);
   }
