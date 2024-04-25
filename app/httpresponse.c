@@ -1,4 +1,6 @@
+#include "lib/filehandler.h"
 #include "lib/http_response.h"
+#include "lib/http_response_line.h"
 #include "lib/stringutil.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,6 +36,32 @@ char *getPlainReturnValue(char *statusline, char *content) {
   sprintf(returnValue,
           "%sContent-Type: text/plain\r\nContent-Length: %lu\r\n\r\n%s\r\n",
           statusline, strlen(content), content);
+
+  return returnValue;
+}
+
+char *getOctetStreamResponse(char *statusline, char *filePath) {
+  char *headers = "Content-Type: application/octet-stream\r\nContent-Length: ";
+  size_t headersLength = strlen(headers + 1);
+
+  char *fileContent = getFileContents(filePath);
+  size_t contentLength;
+  if (strcmp(fileContent, FILE_UNABLE_TO_BE_OPENED)) {
+    statusline = HTTP_STATUSLINE_NOT_FOUND;
+    contentLength = 0;
+  } else {
+    contentLength = strlen(fileContent);
+  }
+
+  size_t totalLength = headersLength + contentLength;
+
+  char *returnValue = (char *)malloc(totalLength + 1);
+  if (returnValue == NULL) {
+    return NULL;
+  }
+
+  sprintf(returnValue, "%s%s\r\n%lu\r\n%s", statusline, headers, contentLength,
+          fileContent);
 
   return returnValue;
 }

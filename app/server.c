@@ -1,4 +1,5 @@
 #include "lib/arrayutil.h"
+#include "lib/filehandler.h"
 #include "lib/http_response.h"
 #include "lib/http_response_line.h"
 #include "lib/parsehttpcontent.h"
@@ -142,6 +143,9 @@ void *handleRequest(void *data) {
         }
       }
     }
+  } else if (strncmp(request.m_path, FILES_ROUTE, strlen(FILES_ROUTE)) == 0) {
+    char *path = strstr(request.m_path, FILES_ROUTE);
+    toSend = getOctetStreamResponse(HTTP_STATUSLINE_OK, path);
   } else {
     toSend = getResponseCodeValue(HTTP_STATUSLINE_NOT_FOUND);
   }

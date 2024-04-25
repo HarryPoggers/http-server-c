@@ -1,4 +1,4 @@
-build: server parser stringutil response
+build: server parser stringutil response filehandler
 	@echo "Linking..."
 	@gcc build/*.o -o build/http-server -s -pthread
 server:
@@ -18,6 +18,10 @@ response:
 	@echo "Compiling response..."
 	@gcc -c -o build/response.o app/httpresponse.c -g
 
-debug: server parser stringutil response
+filehandler:
+	@echo "Compiling filehandler..."
+	@gcc -c -o build/filehandler.o app/filehandler.c -g
+
+debug: server parser stringutil response filehandler
 	@echo "Compiling with debug symbols..."
 	@gcc build/*.o -o build/http-server -g -pthread
