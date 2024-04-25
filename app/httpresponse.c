@@ -60,7 +60,7 @@ char *getOctetStreamResponse(char *statusline, char *filePath) {
     return NULL;
   }
 
-  sprintf(returnValue, "%s%s\r\n%lu\r\n%s", statusline, headers, contentLength,
+  sprintf(returnValue, "%s%s%lu\r\n\r\n%s", statusline, headers, contentLength,
           fileContent);
 
   return returnValue;
