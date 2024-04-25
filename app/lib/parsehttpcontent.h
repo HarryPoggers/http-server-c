@@ -4,12 +4,13 @@
 #include <stddef.h>
 
 #define MAX_BODY_SIZE 1024
+#define MAX_HEADER_SIZE 2048
 
 typedef struct HttpRequest {
   char m_method[10];
   char m_path[255];
   char m_version[20];
-  char *m_headers[255];
+  char *m_headers[MAX_HEADER_SIZE];
   char m_body[MAX_BODY_SIZE];
 } HttpRequest;
 

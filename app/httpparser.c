@@ -36,7 +36,17 @@ HttpRequest *parseHttpContent(char *buf, size_t bufsize) {
       if (parseHeaders(c, lines[i], headerIndex)) {
         headerIndex++;
       } else { // If it's not a header by standard, append it to the body
-        strcat(c->m_body, lines[i]);
+        // Calculate the remaining space in m_body
+        size_t remaining_space = MAX_BODY_SIZE - strlen(c->m_body);
+        // Ensure there's enough space to append the new line
+        if (strlen(lines[i]) < remaining_space) {
+          // Use strncat to safely append the new line
+          strncat(c->m_body, lines[i],
+                  remaining_space - 1); // Leave space for the null terminator
+        } else {
+          // Handle the case where there's not enough space, e.g., by truncating
+          // or logging an error
+        }
       }
     }
   }
@@ -87,7 +97,7 @@ bool parseHeaders(HttpRequest *content, char *line, int headerIndex) {
     return false;
   } else {
     content->m_headers[headerIndex] =
-        malloc(strlen(line)); // Allocate memory to save the content in
+        malloc(strlen(line) + 1); // Allocate memory to save the content in
     strcpy(content->m_headers[headerIndex],
            line); // Copy the value to the specified index
     done = true;

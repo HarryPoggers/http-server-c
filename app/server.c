@@ -63,24 +63,28 @@ int main() {
 
     printf("Waiting for a client to connect...\n");
     client_addr_len = sizeof(client_addr);
+
     int client_fd = accept(server_fd, (struct sockaddr *)&client_addr,
                            (socklen_t *)&client_addr_len);
-    if (client_fd < 0) {
-      printf("Accept failed: %s\n", strerror(errno));
-      return 1;
-    }
-    printf("Client connected\n");
+    printf("Client %d connected\n", client_fd);
 
-    pthread_t t;
-    printf("Creating thread for request\n");
-    if (pthread_create(&t, NULL, handleRequest, (void *)&client_fd) != 0) {
-      printf("Failed to create thread to handle request data\n");
+    // pthread_t t;
+    // printf("Creating thread for request\n");
+    // if (pthread_create(&t, NULL, handleRequest, (void *)&client_fd) != 0) {
+    //   printf("Failed to create thread to handle request data\n");
+    //   continue; // Skip to the next iteration
+    // }
+    //
+    // pthread_detach(
+    //     t); // Detach from the thread to allow it to clean up after itself
+    if (0 == fork()) // create fork for handling multiple clients concurrently
+    {
+      close(server_fd);
+      handleRequest(&client_fd);
+      exit(0);
+    } else {
       close(client_fd);
-      continue; // Skip to the next iteration
     }
-
-    pthread_detach(
-        t); // Detach from the thread to allow it to clean up after itself
   }
 
   close(server_fd);
@@ -101,6 +105,8 @@ void *handleRequest(void *data) {
     close(client_fd);
     return NULL;
   }
+
+  printf("Received %d bytes from %d\n", bytes_read, client_fd);
 
   HttpRequest request = *parseHttpContent(buffer, bytes_read);
 
