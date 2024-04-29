@@ -2,6 +2,8 @@
 #define HTTP_STATUSLINE_H
 
 #define HTTP_STATUSLINE_OK "HTTP/1.1 200 OK\r\n"
-#define HTTP_STATUSLINE_NOT_FOUND "HTTP/1.1 404 NOT FOUND\r\n"
+#define HTTP_STATUSLINE_CREATED "HTTP/1.1 201 Created\r\n"
+#define HTTP_STATUSLINE_NOT_FOUND "HTTP/1.1 404 Not Found\r\n"
+#define HTTP_STATUSLINE_SERVER_ERROR "HTTP/1.1 500 Internal Server Error\r\n"
 
 #endif

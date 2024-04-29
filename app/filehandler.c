@@ -23,3 +23,19 @@ char *getFileContents(char *path) {
 
   return buffer;
 }
+
+bool writeToFile(char *path, char *content) {
+  FILE *f;
+
+  f = fopen(path, "w");
+
+  if (f == NULL) {
+    return false;
+  }
+
+  fprintf(f, "%s", content);
+
+  fclose(f);
+
+  return true;
+}

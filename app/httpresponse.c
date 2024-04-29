@@ -2,10 +2,10 @@
 #include "lib/http_response.h"
 #include "lib/http_response_line.h"
 #include "lib/stringutil.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 char *getResponseCodeValue(char *statusline) {
   char *contentLengthHeader = "Content-Length: 0\r\n";
 
@@ -71,4 +71,21 @@ char *getOctetStreamResponse(char *statusline, char directory[],
           fileContent);
 
   return returnValue;
+}
+
+char *getFileCreationResponse(char directory[], char *fileName, char *content) {
+  char *filePath = malloc(strlen(directory) + strlen(fileName) + 2);
+  sprintf(filePath, "%s/%s", directory, fileName);
+
+  char *returnValue = (char *)malloc(strlen(HTTP_STATUSLINE_CREATED) + 2);
+  sprintf(returnValue, "%s\r\n", HTTP_STATUSLINE_CREATED);
+
+  printf("Writing file to %s with content %s\n", filePath, content);
+  bool success = writeToFile(filePath, content);
+  if (success) {
+    return returnValue;
+  } else {
+    printf("ERROR: Creating file failed.\n");
+    return HTTP_STATUSLINE_SERVER_ERROR;
+  }
 }

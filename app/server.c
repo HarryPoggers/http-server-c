@@ -126,32 +126,47 @@ void *handleRequest(void *data) {
 
   printf("Body:\t%s\n", request.m_body);
 
-  if (strcmp(request.m_path, "/") == 0) {
-    toSend = getResponseCodeValue(HTTP_STATUSLINE_OK);
-  } else if (strncmp(request.m_path, ECHO_ROUTE, strlen(ECHO_ROUTE)) == 0) {
-    char *returnvalue = strstr(request.m_path, ECHO_ROUTE);
-    returnvalue += strlen(ECHO_ROUTE);
-    toSend = getPlainReturnValue(HTTP_STATUSLINE_OK, returnvalue);
-  } else if (strcmp(request.m_path, USER_AGENT_ROUTE) == 0) {
-    char toSearch[] = "User-Agent:";
-    for (int i = 0; i < ARRAYLENGTH(request.m_headers); i++) {
-      if (request.m_headers[i] != NULL) {
-        if (strncmp(request.m_headers[i], toSearch, strlen(toSearch)) == 0) {
-          int count = 0;
-          char *seperators = ": ";
-          char **parts = split(request.m_headers[i], seperators, &count);
-          if (count == 2) {
-            toSend = getPlainReturnValue(HTTP_STATUSLINE_OK, parts[1]);
+  /*
+   * GET HANDLER
+   */
+  if (strcmp(request.m_method, "GET") == 0) {
+    if (strcmp(request.m_path, "/") == 0) {
+      toSend = getResponseCodeValue(HTTP_STATUSLINE_OK);
+    } else if (strncmp(request.m_path, ECHO_ROUTE, strlen(ECHO_ROUTE)) == 0) {
+      char *returnvalue = strstr(request.m_path, ECHO_ROUTE);
+      returnvalue += strlen(ECHO_ROUTE);
+      toSend = getPlainReturnValue(HTTP_STATUSLINE_OK, returnvalue);
+    } else if (strcmp(request.m_path, USER_AGENT_ROUTE) == 0) {
+      char toSearch[] = "User-Agent:";
+      for (int i = 0; i < ARRAYLENGTH(request.m_headers); i++) {
+        if (request.m_headers[i] != NULL) {
+          if (strncmp(request.m_headers[i], toSearch, strlen(toSearch)) == 0) {
+            int count = 0;
+            char *seperators = ": ";
+            char **parts = split(request.m_headers[i], seperators, &count);
+            if (count == 2) {
+              toSend = getPlainReturnValue(HTTP_STATUSLINE_OK, parts[1]);
+            }
           }
         }
       }
+    } else if (strncmp(request.m_path, FILES_ROUTE, strlen(FILES_ROUTE)) == 0) {
+      char *path = strstr(request.m_path, FILES_ROUTE);
+      path += strlen(FILES_ROUTE);
+      toSend = getOctetStreamResponse(HTTP_STATUSLINE_OK, directory, path);
+    } else {
+      toSend = getResponseCodeValue(HTTP_STATUSLINE_NOT_FOUND);
     }
-  } else if (strncmp(request.m_path, FILES_ROUTE, strlen(FILES_ROUTE)) == 0) {
-    char *path = strstr(request.m_path, FILES_ROUTE);
-    path += strlen(FILES_ROUTE);
-    toSend = getOctetStreamResponse(HTTP_STATUSLINE_OK, directory, path);
-  } else {
-    toSend = getResponseCodeValue(HTTP_STATUSLINE_NOT_FOUND);
+
+    /*
+     * POST HANDLER
+     */
+  } else if (strcmp(request.m_method, "POST") == 0) {
+    if (strncmp(request.m_path, FILES_ROUTE, strlen(FILES_ROUTE)) == 0) {
+      char *path = strstr(request.m_path, FILES_ROUTE);
+      path += strlen(FILES_ROUTE);
+      toSend = getFileCreationResponse(directory, path, request.m_body);
+    }
   }
 
   if (toSend != NULL) {
